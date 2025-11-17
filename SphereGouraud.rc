@@ -108,13 +108,13 @@ BEGIN
     BEGIN
         BLOCK "080404B0"
         BEGIN
-            VALUE "CompanyName", "TODO: <公司名>"
-            VALUE "FileDescription", "SphereGouraud"
+            VALUE "CompanyName", "SphereGouraud"
+            VALUE "FileDescription", "SphereGouraud Application"
             VALUE "FileVersion", "1.0.0.1"
             VALUE "InternalName", "SphereGouraud.exe"
-            VALUE "LegalCopyright", "TODO: (C) <公司名>。保留所有权利。"
+            VALUE "LegalCopyright", "Copyright (C) 2025"
             VALUE "OriginalFilename", "SphereGouraud.exe"
-            VALUE "ProductName", "TODO: <产品名>"
+            VALUE "ProductName", "SphereGouraud"
             VALUE "ProductVersion", "1.0.0.1"
         END
     END
