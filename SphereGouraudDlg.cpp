@@ -40,13 +40,13 @@ CSphereGouraudDlg::CSphereGouraudDlg(CWnd* pParent /*=nullptr*/)
     m_lightPos = Vector3(300.0, 400.0, 200.0);  // Reduced Z from 500 to 200
     
     // Material properties - Bright colors for clear visibility
-    m_ambientColor = Vector3(0.3, 0.3, 0.3);  // Increased ambient
+    m_ambientColor = Vector3(0.4, 0.4, 0.4);  // Higher ambient to prevent black edges
     m_diffuseColor = Vector3(0.9, 0.9, 0.9);  // Very bright gray for visibility
     m_specularColor = Vector3(1.0, 1.0, 1.0);
     m_shininess = 32.0;
     
-    // Light properties - Brighter lighting
-    m_lightAmbient = Vector3(0.5, 0.5, 0.5);  // Increased ambient light
+    // Light properties - Brighter lighting with stronger ambient
+    m_lightAmbient = Vector3(0.6, 0.6, 0.6);  // Strong ambient light to eliminate black spots
     m_lightDiffuse = Vector3(1.0, 1.0, 1.0);
     m_lightSpecular = Vector3(1.0, 1.0, 1.0);
 }
@@ -281,12 +281,12 @@ void CSphereGouraudDlg::DrawTriangleGouraud(CDC* pDC, const Vertex& v0, const Ve
             GetBarycentricCoords(x, y, v0.screenX, v0.screenY, v1.screenX, v1.screenY,
                                v2.screenX, v2.screenY, w0, w1, w2);
             
-            if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
+            if (w0 >= -0.0001 && w1 >= -0.0001 && w2 >= -0.0001) {  // Small tolerance for edge pixels
                 double z = v0.screenZ * w0 + v1.screenZ * w1 + v2.screenZ * w2;
                 
                 int bufferIndex = y * m_zBufferWidth + x;
-                // Add small epsilon to reduce Z-fighting artifacts at edges
-                if (bufferIndex >= 0 && bufferIndex < (int)m_zBuffer.size() && z > m_zBuffer[bufferIndex] + 0.001) {
+                // Simple Z-test without epsilon (ambient light prevents pure black)
+                if (bufferIndex >= 0 && bufferIndex < (int)m_zBuffer.size() && z > m_zBuffer[bufferIndex]) {
                     m_zBuffer[bufferIndex] = z;
                     
                     COLORREF color = InterpolateColor(v0.color, v1.color, v2.color, w0, w1, w2);
