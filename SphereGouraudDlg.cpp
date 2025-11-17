@@ -188,8 +188,13 @@ COLORREF CSphereGouraudDlg::CalculateVertexColor(const Vertex& vertex) {
         m_specularColor.z * m_lightSpecular.z * spec
     );
     
-    // Combine
+    // Combine and clamp to minimum brightness
     Vector3 color = ambient + diffuse + specular;
+    
+    // Ensure minimum brightness to prevent pure black (safety measure)
+    color.x = std::max(color.x, 0.15);
+    color.y = std::max(color.y, 0.15);
+    color.z = std::max(color.z, 0.15);
     
     int r = std::min(255, std::max(0, (int)(color.x * 255)));
     int g = std::min(255, std::max(0, (int)(color.y * 255)));
@@ -216,7 +221,14 @@ void CSphereGouraudDlg::TransformVertices(int width, int height) {
         RotateX(v.transformedNormal, m_rotationX);
         RotateY(v.transformedNormal, m_rotationY);
         RotateZ(v.transformedNormal, m_rotationZ);
-        v.transformedNormal = v.transformedNormal.normalize();
+        // Ensure normal is properly normalized (critical for correct lighting)
+        double len = v.transformedNormal.length();
+        if (len > 0.0001) {
+            v.transformedNormal = v.transformedNormal.normalize();
+        } else {
+            // Fallback for degenerate case
+            v.transformedNormal = v.normal;
+        }
         
         v.color = CalculateVertexColor(v);
         
@@ -281,7 +293,7 @@ void CSphereGouraudDlg::DrawTriangleGouraud(CDC* pDC, const Vertex& v0, const Ve
             GetBarycentricCoords(x, y, v0.screenX, v0.screenY, v1.screenX, v1.screenY,
                                v2.screenX, v2.screenY, w0, w1, w2);
             
-            if (w0 >= -0.0001 && w1 >= -0.0001 && w2 >= -0.0001) {  // Small tolerance for edge pixels
+            if (w0 >= 0.0 && w1 >= 0.0 && w2 >= 0.0) {  // Strict triangle test
                 double z = v0.screenZ * w0 + v1.screenZ * w1 + v2.screenZ * w2;
                 
                 int bufferIndex = y * m_zBufferWidth + x;
