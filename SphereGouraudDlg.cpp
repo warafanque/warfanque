@@ -23,10 +23,10 @@ const double SPHERE_RADIUS = 200.0;
 // CSphereGouraudDlg dialog
 
 CSphereGouraudDlg::CSphereGouraudDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_SPHEREGOURAUD_DIALOG, pParent)
+    : CDialogEx(IDD_SPHEREGOURAUD_DIALOG, pParent)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-    
+    m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+
     // Initialize variables
     m_zBufferWidth = 0;
     m_zBufferHeight = 0;
@@ -35,16 +35,16 @@ CSphereGouraudDlg::CSphereGouraudDlg(CWnd* pParent /*=nullptr*/)
     m_rotationZ = 0.0;
     m_isAnimating = false;
     m_timerID = 0;
-    
+
     // Light source (front upper right - closer to viewer for better lighting)
     m_lightPos = Vector3(300.0, 400.0, 200.0);  // Reduced Z from 500 to 200
-    
+
     // Material properties - Bright colors for clear visibility
     m_ambientColor = Vector3(0.4, 0.4, 0.4);  // Higher ambient to prevent black edges
     m_diffuseColor = Vector3(0.9, 0.9, 0.9);  // Very bright gray for visibility
     m_specularColor = Vector3(1.0, 1.0, 1.0);
     m_shininess = 32.0;
-    
+
     // Light properties - Brighter lighting with stronger ambient
     m_lightAmbient = Vector3(0.6, 0.6, 0.6);  // Strong ambient light to eliminate black spots
     m_lightDiffuse = Vector3(1.0, 1.0, 1.0);
@@ -53,12 +53,12 @@ CSphereGouraudDlg::CSphereGouraudDlg(CWnd* pParent /*=nullptr*/)
 
 void CSphereGouraudDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialogEx::DoDataExchange(pDX);
+    CDialogEx::DoDataExchange(pDX);
 }
 
 BEGIN_MESSAGE_MAP(CSphereGouraudDlg, CDialogEx)
-	ON_WM_PAINT()
-	ON_WM_QUERYDRAGICON()
+    ON_WM_PAINT()
+    ON_WM_QUERYDRAGICON()
     ON_WM_TIMER()
     ON_BN_CLICKED(IDC_ANIMATE, &CSphereGouraudDlg::OnBnClickedAnimate)
     ON_WM_KEYDOWN()
@@ -70,17 +70,17 @@ END_MESSAGE_MAP()
 
 BOOL CSphereGouraudDlg::OnInitDialog()
 {
-	CDialogEx::OnInitDialog();
+    CDialogEx::OnInitDialog();
 
-	// Set the icon for this dialog.  The framework does this automatically
-	//  when the application's main window is not a dialog
-	SetIcon(m_hIcon, TRUE);			// Set big icon
-	SetIcon(m_hIcon, FALSE);		// Set small icon
+    // Set the icon for this dialog.  The framework does this automatically
+    //  when the application's main window is not a dialog
+    SetIcon(m_hIcon, TRUE);			// Set big icon
+    SetIcon(m_hIcon, FALSE);		// Set small icon
 
-	// Initialize sphere mesh
+    // Initialize sphere mesh
     CreateSphereMesh();
 
-	return TRUE;  // return TRUE  unless you set the focus to a control
+    return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
 // Matrix operations
@@ -115,41 +115,41 @@ void RotateZ(Vector3& v, double angle) {
 void CSphereGouraudDlg::CreateSphereMesh() {
     m_vertices.clear();
     m_triangles.clear();
-    
+
     // Create vertices
     for (int lat = 0; lat <= SPHERE_SEGMENTS_LAT; lat++) {
         double theta = PI * lat / SPHERE_SEGMENTS_LAT;
         double sinTheta = sin(theta);
         double cosTheta = cos(theta);
-        
+
         for (int lon = 0; lon <= SPHERE_SEGMENTS_LON; lon++) {
             double phi = 2.0 * PI * lon / SPHERE_SEGMENTS_LON;
             double sinPhi = sin(phi);
             double cosPhi = cos(phi);
-            
+
             Vertex vertex;
             vertex.position.x = SPHERE_RADIUS * sinTheta * cosPhi;
             vertex.position.y = SPHERE_RADIUS * cosTheta;
             vertex.position.z = SPHERE_RADIUS * sinTheta * sinPhi;
-            
+
             vertex.normal = vertex.position.normalize();
-            
+
             m_vertices.push_back(vertex);
         }
     }
-    
+
     // Create triangles
     for (int lat = 0; lat < SPHERE_SEGMENTS_LAT; lat++) {
         for (int lon = 0; lon < SPHERE_SEGMENTS_LON; lon++) {
             int first = lat * (SPHERE_SEGMENTS_LON + 1) + lon;
             int second = first + SPHERE_SEGMENTS_LON + 1;
-            
+
             Triangle tri1;
             tri1.v0 = first;
             tri1.v1 = second;
             tri1.v2 = first + 1;
             m_triangles.push_back(tri1);
-            
+
             Triangle tri2;
             tri2.v0 = second;
             tri2.v1 = second + 1;
@@ -163,14 +163,14 @@ void CSphereGouraudDlg::CreateSphereMesh() {
 COLORREF CSphereGouraudDlg::CalculateVertexColor(const Vertex& vertex) {
     Vector3 lightDir = (m_lightPos - vertex.transformedPos).normalize();
     Vector3 viewDir = Vector3(0, 0, 1);
-    
+
     // Ambient
     Vector3 ambient = Vector3(
         m_ambientColor.x * m_lightAmbient.x,
         m_ambientColor.y * m_lightAmbient.y,
         m_ambientColor.z * m_lightAmbient.z
     );
-    
+
     // Diffuse
     double diff = std::max(0.0, vertex.transformedNormal.dot(lightDir));
     Vector3 diffuse = Vector3(
@@ -178,7 +178,7 @@ COLORREF CSphereGouraudDlg::CalculateVertexColor(const Vertex& vertex) {
         m_diffuseColor.y * m_lightDiffuse.y * diff,
         m_diffuseColor.z * m_lightDiffuse.z * diff
     );
-    
+
     // Specular (Blinn-Phong)
     Vector3 halfDir = (lightDir + viewDir).normalize();
     double spec = pow(std::max(0.0, vertex.transformedNormal.dot(halfDir)), m_shininess);
@@ -187,19 +187,19 @@ COLORREF CSphereGouraudDlg::CalculateVertexColor(const Vertex& vertex) {
         m_specularColor.y * m_lightSpecular.y * spec,
         m_specularColor.z * m_lightSpecular.z * spec
     );
-    
+
     // Combine and clamp to minimum brightness
     Vector3 color = ambient + diffuse + specular;
-    
+
     // Ensure minimum brightness to prevent pure black (safety measure)
     color.x = std::max(color.x, 0.15);
     color.y = std::max(color.y, 0.15);
     color.z = std::max(color.z, 0.15);
-    
+
     int r = std::min(255, std::max(0, (int)(color.x * 255)));
     int g = std::min(255, std::max(0, (int)(color.y * 255)));
     int b = std::min(255, std::max(0, (int)(color.z * 255)));
-    
+
     return RGB(r, g, b);
 }
 
@@ -207,17 +207,17 @@ COLORREF CSphereGouraudDlg::CalculateVertexColor(const Vertex& vertex) {
 void CSphereGouraudDlg::TransformVertices(int width, int height) {
     int centerX = width / 2;
     int centerY = height / 2;
-    
+
     for (size_t i = 0; i < m_vertices.size(); i++) {
         Vertex& v = m_vertices[i];
-        
+
         v.transformedPos = v.position;
         v.transformedNormal = v.normal;
-        
+
         RotateX(v.transformedPos, m_rotationX);
         RotateY(v.transformedPos, m_rotationY);
         RotateZ(v.transformedPos, m_rotationZ);
-        
+
         RotateX(v.transformedNormal, m_rotationX);
         RotateY(v.transformedNormal, m_rotationY);
         RotateZ(v.transformedNormal, m_rotationZ);
@@ -225,13 +225,14 @@ void CSphereGouraudDlg::TransformVertices(int width, int height) {
         double len = v.transformedNormal.length();
         if (len > 0.0001) {
             v.transformedNormal = v.transformedNormal.normalize();
-        } else {
+        }
+        else {
             // Fallback for degenerate case
             v.transformedNormal = v.normal;
         }
-        
+
         v.color = CalculateVertexColor(v);
-        
+
         v.screenX = centerX + (int)v.transformedPos.x;
         v.screenY = centerY - (int)v.transformedPos.y;
         v.screenZ = -v.transformedPos.z;  // Negate Z to convert to depth (distance from viewer)
@@ -240,21 +241,21 @@ void CSphereGouraudDlg::TransformVertices(int width, int height) {
 
 // Barycentric coordinates
 void GetBarycentricCoords(int x, int y, int x1, int y1, int x2, int y2, int x3, int y3,
-                          double& w1, double& w2, double& w3) {
+    double& w1, double& w2, double& w3) {
     // Convert all to double for precise floating point calculations
     double dX = (double)x;
     double dY = (double)y;
     double dX1 = (double)x1, dY1 = (double)y1;
     double dX2 = (double)x2, dY2 = (double)y2;
     double dX3 = (double)x3, dY3 = (double)y3;
-    
+
     double denom = (dY2 - dY3) * (dX1 - dX3) + (dX3 - dX2) * (dY1 - dY3);
-    
+
     if (fabs(denom) < 1e-6) {  // Use smaller epsilon for better precision
         w1 = w2 = w3 = 0;
         return;
     }
-    
+
     // Compute barycentric coordinates with proper floating point arithmetic
     w1 = ((dY2 - dY3) * (dX - dX3) + (dX3 - dX2) * (dY - dY3)) / denom;
     w2 = ((dY3 - dY1) * (dX - dX3) + (dX1 - dX3) * (dY - dY3)) / denom;
@@ -266,11 +267,11 @@ COLORREF InterpolateColor(COLORREF c1, COLORREF c2, COLORREF c3, double w1, doub
     int r = (int)(GetRValue(c1) * w1 + GetRValue(c2) * w2 + GetRValue(c3) * w3);
     int g = (int)(GetGValue(c1) * w1 + GetGValue(c2) * w2 + GetGValue(c3) * w3);
     int b = (int)(GetBValue(c1) * w1 + GetBValue(c2) * w2 + GetBValue(c3) * w3);
-    
+
     r = std::min(255, std::max(0, r));
     g = std::min(255, std::max(0, g));
     b = std::min(255, std::max(0, b));
-    
+
     return RGB(r, g, b);
 }
 
@@ -295,12 +296,17 @@ void CSphereGouraudDlg::DrawTriangleGouraud(CDC* pDC, const Vertex& v0, const Ve
     minY = std::max(0, minY);
     maxY = std::min(m_zBufferHeight - 1, maxY);
 
+<<<<<<< Updated upstream
     const double DEPTH_BIAS = 1e-4; // Small depth bias to prevent Z-fighting
+=======
+    const double DEPTH_BIAS = 1e-3; // Define a small bias to prevent artifacts
+>>>>>>> Stashed changes
 
     // Rasterize
     for (int y = minY; y <= maxY; y++) {
         for (int x = minX; x <= maxX; x++) {
             double w0, w1, w2;
+<<<<<<< Updated upstream
             GetBarycentricCoords(x, y,
                                  v0.screenX, v0.screenY,
                                  v1.screenX, v1.screenY,
@@ -311,6 +317,16 @@ void CSphereGouraudDlg::DrawTriangleGouraud(CDC* pDC, const Vertex& v0, const Ve
             if (w0 >= 0.0 && w1 >= 0.0 && w2 >= 0.0) {
                 double z = v0.screenZ * w0 + v1.screenZ * w1 + v2.screenZ * w2;
                 z -= DEPTH_BIAS; // Give polygon slight depth advantage
+=======
+            GetBarycentricCoords(x, y, v0.screenX, v0.screenY, v1.screenX, v1.screenY,
+                v2.screenX, v2.screenY, w0, w1, w2);
+
+            if (w0 >= -1e-6 && w1 >= -1e-6 && w2 >= -1e-6) {  // Loosen the triangle test slightly for edges
+                double z = v0.screenZ * w0 + v1.screenZ * w1 + v2.screenZ * w2;
+
+                // Apply depth bias to give polygon faces depth priority
+                z -= DEPTH_BIAS;
+>>>>>>> Stashed changes
 
                 int bufferIndex = y * m_zBufferWidth + x;
                 if (bufferIndex >= 0 && bufferIndex < (int)m_zBuffer.size() &&
@@ -333,14 +349,14 @@ void CSphereGouraudDlg::RenderScene(CDC* pDC, int width, int height) {
         m_zBuffer.resize(width * height);
     }
     std::fill(m_zBuffer.begin(), m_zBuffer.end(), 10000.0);  // Initialize to far distance (large positive)
-    
+
     TransformVertices(width, height);
-    
+
     for (const Triangle& tri : m_triangles) {
         const Vertex& v0 = m_vertices[tri.v0];
         const Vertex& v1 = m_vertices[tri.v1];
         const Vertex& v2 = m_vertices[tri.v2];
-        
+
         DrawTriangleGouraud(pDC, v0, v1, v2);
     }
 }
@@ -351,61 +367,61 @@ void CSphereGouraudDlg::RenderScene(CDC* pDC, int width, int height) {
 
 void CSphereGouraudDlg::OnPaint()
 {
-	if (IsIconic())
-	{
-		CPaintDC dc(this); // device context for painting
+    if (IsIconic())
+    {
+        CPaintDC dc(this); // device context for painting
 
-		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
+        SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
 
-		// Center icon in client rectangle
-		int cxIcon = GetSystemMetrics(SM_CXICON);
-		int cyIcon = GetSystemMetrics(SM_CYICON);
-		CRect rect;
-		GetClientRect(&rect);
-		int x = (rect.Width() - cxIcon + 1) / 2;
-		int y = (rect.Height() - cyIcon + 1) / 2;
+        // Center icon in client rectangle
+        int cxIcon = GetSystemMetrics(SM_CXICON);
+        int cyIcon = GetSystemMetrics(SM_CYICON);
+        CRect rect;
+        GetClientRect(&rect);
+        int x = (rect.Width() - cxIcon + 1) / 2;
+        int y = (rect.Height() - cyIcon + 1) / 2;
 
-		// Draw the icon
-		dc.DrawIcon(x, y, m_hIcon);
-	}
-	else
-	{
+        // Draw the icon
+        dc.DrawIcon(x, y, m_hIcon);
+    }
+    else
+    {
         CPaintDC dc(this);
         CRect rect;
         GetClientRect(&rect);
-        
+
         // Adjust for button area
         int buttonHeight = 40;
         int renderHeight = rect.Height() - buttonHeight;
-        
+
         // Create memory DC
         CDC memDC;
         memDC.CreateCompatibleDC(&dc);
         CBitmap bitmap;
         bitmap.CreateCompatibleBitmap(&dc, rect.Width(), renderHeight);
         CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
-        
+
         // Fill background with RGB(128, 0, 0)
         memDC.FillSolidRect(0, 0, rect.Width(), renderHeight, RGB(128, 0, 0));
-        
+
         // Render scene
         RenderScene(&memDC, rect.Width(), renderHeight);
-        
+
         // Copy to screen
         dc.BitBlt(0, buttonHeight, rect.Width(), renderHeight, &memDC, 0, 0, SRCCOPY);
-        
+
         // Cleanup
         memDC.SelectObject(pOldBitmap);
-        
-		CDialogEx::OnPaint();
-	}
+
+        CDialogEx::OnPaint();
+    }
 }
 
 // The system calls this function to obtain the cursor to display while the user drags
 //  the minimized window.
 HCURSOR CSphereGouraudDlg::OnQueryDragIcon()
 {
-	return static_cast<HCURSOR>(m_hIcon);
+    return static_cast<HCURSOR>(m_hIcon);
 }
 
 void CSphereGouraudDlg::OnTimer(UINT_PTR nIDEvent)
@@ -414,7 +430,7 @@ void CSphereGouraudDlg::OnTimer(UINT_PTR nIDEvent)
         UpdateRotation();
         Invalidate(FALSE);
     }
-    
+
     CDialogEx::OnTimer(nIDEvent);
 }
 
@@ -427,11 +443,12 @@ void CSphereGouraudDlg::UpdateRotation()
 void CSphereGouraudDlg::OnBnClickedAnimate()
 {
     m_isAnimating = !m_isAnimating;
-    
+
     if (m_isAnimating) {
         m_timerID = SetTimer(1, 16, NULL);
         GetDlgItem(IDC_ANIMATE)->SetWindowText(_T("停止"));
-    } else {
+    }
+    else {
         if (m_timerID != 0) {
             KillTimer(m_timerID);
             m_timerID = 0;
@@ -460,7 +477,7 @@ void CSphereGouraudDlg::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
         Invalidate(FALSE);
         break;
     }
-    
+
     CDialogEx::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
@@ -470,14 +487,14 @@ BOOL CSphereGouraudDlg::PreTranslateMessage(MSG* pMsg)
         OnKeyDown((UINT)pMsg->wParam, (UINT)LOWORD(pMsg->lParam), (UINT)HIWORD(pMsg->lParam));
         return TRUE;
     }
-    
+
     return CDialogEx::PreTranslateMessage(pMsg);
 }
 
 void CSphereGouraudDlg::OnDestroy()
 {
     CDialogEx::OnDestroy();
-    
+
     if (m_timerID != 0) {
         KillTimer(m_timerID);
         m_timerID = 0;
