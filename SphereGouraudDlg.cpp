@@ -38,14 +38,14 @@ CSphereGouraudDlg::CSphereGouraudDlg(CWnd* pParent /*=nullptr*/)
     // Light source (upper right)
     m_lightPos = Vector3(300.0, 400.0, 500.0);
     
-    // Material properties
-    m_ambientColor = Vector3(0.2, 0.2, 0.2);
-    m_diffuseColor = Vector3(0.7, 0.7, 0.7);  // Changed to light gray for better visibility
+    // Material properties - Bright colors for clear visibility
+    m_ambientColor = Vector3(0.3, 0.3, 0.3);  // Increased ambient
+    m_diffuseColor = Vector3(0.9, 0.9, 0.9);  // Very bright gray for visibility
     m_specularColor = Vector3(1.0, 1.0, 1.0);
     m_shininess = 32.0;
     
-    // Light properties
-    m_lightAmbient = Vector3(0.3, 0.3, 0.3);
+    // Light properties - Brighter lighting
+    m_lightAmbient = Vector3(0.5, 0.5, 0.5);  // Increased ambient light
     m_lightDiffuse = Vector3(1.0, 1.0, 1.0);
     m_lightSpecular = Vector3(1.0, 1.0, 1.0);
 }
