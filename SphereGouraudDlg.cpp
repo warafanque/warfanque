@@ -431,14 +431,14 @@ void CSphereGouraudDlg::OnBnClickedAnimate()
 
     if (m_isAnimating) {
         m_timerID = SetTimer(1, 16, NULL);
-        GetDlgItem(IDC_ANIMATE)->SetWindowText(_T("停止"));
+        GetDlgItem(IDC_ANIMATE)->SetWindowText(L"停止");
     }
     else {
         if (m_timerID != 0) {
             KillTimer(m_timerID);
             m_timerID = 0;
         }
-        GetDlgItem(IDC_ANIMATE)->SetWindowText(_T("动画"));
+        GetDlgItem(IDC_ANIMATE)->SetWindowText(L"动画");
     }
 }
 
