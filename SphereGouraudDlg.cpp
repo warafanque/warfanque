@@ -7,6 +7,7 @@
 #include "SphereGouraudDlg.h"
 #include "afxdialogex.h"
 #include <algorithm>
+#include <cmath>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
