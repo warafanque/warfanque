@@ -1,5 +1,6 @@
 // SphereGouraudDlg.cpp : implementation file
 //
+#pragma execution_character_set("utf-8")
 
 #include "pch.h"
 #include "framework.h"
@@ -35,8 +36,8 @@ CSphereGouraudDlg::CSphereGouraudDlg(CWnd* pParent /*=nullptr*/)
     m_isAnimating = false;
     m_timerID = 0;
     
-    // Light source (upper right)
-    m_lightPos = Vector3(300.0, 400.0, 500.0);
+    // Light source (front upper right - closer to viewer for better lighting)
+    m_lightPos = Vector3(300.0, 400.0, 200.0);  // Reduced Z from 500 to 200
     
     // Material properties - Bright colors for clear visibility
     m_ambientColor = Vector3(0.3, 0.3, 0.3);  // Increased ambient
@@ -284,7 +285,8 @@ void CSphereGouraudDlg::DrawTriangleGouraud(CDC* pDC, const Vertex& v0, const Ve
                 double z = v0.screenZ * w0 + v1.screenZ * w1 + v2.screenZ * w2;
                 
                 int bufferIndex = y * m_zBufferWidth + x;
-                if (bufferIndex >= 0 && bufferIndex < (int)m_zBuffer.size() && z > m_zBuffer[bufferIndex]) {
+                // Add small epsilon to reduce Z-fighting artifacts at edges
+                if (bufferIndex >= 0 && bufferIndex < (int)m_zBuffer.size() && z > m_zBuffer[bufferIndex] + 0.001) {
                     m_zBuffer[bufferIndex] = z;
                     
                     COLORREF color = InterpolateColor(v0.color, v1.color, v2.color, w0, w1, w2);
