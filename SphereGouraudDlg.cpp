@@ -40,7 +40,7 @@ CSphereGouraudDlg::CSphereGouraudDlg(CWnd* pParent /*=nullptr*/)
     
     // Material properties
     m_ambientColor = Vector3(0.2, 0.2, 0.2);
-    m_diffuseColor = Vector3(0.8, 0.6, 0.4);
+    m_diffuseColor = Vector3(0.7, 0.7, 0.7);  // Changed to light gray for better visibility
     m_specularColor = Vector3(1.0, 1.0, 1.0);
     m_shininess = 32.0;
     
